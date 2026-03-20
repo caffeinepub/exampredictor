@@ -1,0 +1,175 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+Telugu:wght@400;700&display=swap");
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 1rem;
+    --background: 0.1 0.025 265;
+    --foreground: 0.95 0.01 85;
+    --card: 0.14 0.03 270;
+    --card-foreground: 0.95 0.01 85;
+    --popover: 0.16 0.035 270;
+    --popover-foreground: 0.95 0.01 85;
+    --primary: 0.82 0.18 85;
+    --primary-foreground: 0.1 0.025 265;
+    --secondary: 0.65 0.22 290;
+    --secondary-foreground: 0.98 0 0;
+    --muted: 0.18 0.04 265;
+    --muted-foreground: 0.65 0.05 265;
+    --accent: 0.55 0.28 290;
+    --accent-foreground: 0.98 0 0;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.82 0.18 85 / 20%;
+    --input: 0.82 0.18 85 / 15%;
+    --ring: 0.82 0.18 85;
+    --chart-1: 0.82 0.18 85;
+    --chart-2: 0.65 0.22 290;
+    --chart-3: 0.75 0.15 160;
+    --chart-4: 0.7 0.2 30;
+    --chart-5: 0.6 0.25 310;
+    --sidebar: 0.12 0.028 265;
+    --sidebar-foreground: 0.95 0.01 85;
+    --sidebar-primary: 0.82 0.18 85;
+    --sidebar-primary-foreground: 0.1 0.025 265;
+    --sidebar-accent: 0.55 0.28 290;
+    --sidebar-accent-foreground: 0.98 0 0;
+    --sidebar-border: 0.82 0.18 85 / 20%;
+    --sidebar-ring: 0.82 0.18 85;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Bricolage Grotesque", "Noto Sans Telugu", sans-serif;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .font-telugu {
+    font-family: "Noto Sans Telugu", "Bricolage Grotesque", sans-serif;
+  }
+
+  .font-cinzel {
+    font-family: "Cinzel", serif;
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 15px oklch(0.82 0.18 85 / 40%), 0 0 30px
+      oklch(0.82 0.18 85 / 20%);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 15px oklch(0.55 0.28 290 / 40%), 0 0 30px
+      oklch(0.55 0.28 290 / 20%);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 10px oklch(0.82 0.18 85 / 60%), 0 0 20px
+      oklch(0.82 0.18 85 / 30%);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 10px oklch(0.55 0.28 290 / 60%), 0 0 20px
+      oklch(0.55 0.28 290 / 30%);
+  }
+
+  .zodiac-card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .zodiac-card-hover:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 0 20px oklch(0.82 0.18 85 / 50%), 0 0 40px
+      oklch(0.55 0.28 290 / 30%);
+  }
+}
+
+@keyframes rotate-zodiac {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes counter-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 20px oklch(0.82 0.18 85 / 50%), 0 0 40px
+      oklch(0.55 0.28 290 / 30%);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 30px oklch(0.82 0.18 85 / 70%), 0 0 60px
+      oklch(0.55 0.28 290 / 50%);
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-rotate-zodiac {
+  animation: rotate-zodiac 40s linear infinite;
+}
+
+.animate-counter-rotate {
+  animation: counter-rotate 40s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.star-field {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: star-twinkle var(--duration, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
