@@ -555,7 +555,7 @@ export function ZodiacDetailPage() {
             </a>
           </p>
           <p className="text-xs" style={{ color: "oklch(0.45 0.05 265)" }}>
-            ram1019
+            1019-211
           </p>
         </div>
       </footer>

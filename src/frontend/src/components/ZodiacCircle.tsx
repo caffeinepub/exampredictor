@@ -108,7 +108,7 @@ export function ZodiacCircle({ onSignClick }: ZodiacCircleProps) {
           }}
           className="animate-counter-rotate"
         >
-          📚
+          📖
         </div>
       </div>
     </div>

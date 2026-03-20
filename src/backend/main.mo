@@ -1,13 +1,7 @@
-import Nat "mo:core/Nat";
-import Iter "mo:core/Iter";
 import Map "mo:core/Map";
-import Runtime "mo:core/Runtime";
+import Array "mo:base/Array";
 
 actor {
-  type ZodiacSign = Nat;
-
-  let zodiacSigns = Map.empty<ZodiacSign, { quotation : ?Text; ratings : ?Ratings }>();
-
   type Ratings = {
     luck : Nat;
     happiness : Nat;
@@ -16,70 +10,69 @@ actor {
     overall : Nat;
   };
 
-  public func setQuotation(zodiacSign : ZodiacSign, quotation : Text) : async () {
-    if (zodiacSign > 11) { Runtime.trap("Invalid zodiac sign index") };
-    let existingEntry = zodiacSigns.get(zodiacSign);
-    let updatedEntry = {
-      quotation = ?quotation;
-      ratings = switch (existingEntry) { case (null) { null }; case (?data) { data.ratings } };
+  type ZodiacSign = Nat;
+
+  // Keep old stable variable to satisfy upgrade compatibility — migrated in postupgrade
+  stable var zodiacSigns = Map.empty<ZodiacSign, { quotation : ?Text; ratings : ?Ratings }>();
+
+  // New stable storage: 12 slots indexed by zodiac sign
+  stable var quotations : [var ?Text] = [var null, null, null, null, null, null, null, null, null, null, null, null];
+  stable var ratingsStore : [var ?Ratings] = [var null, null, null, null, null, null, null, null, null, null, null, null];
+
+  // Migrate old data from previous non-stable Map into new stable arrays
+  system func postupgrade() {
+    for ((sign, data) in zodiacSigns.entries()) {
+      if (sign < 12) {
+        switch (data.quotation) {
+          case (null) {};
+          case (?q) { quotations[sign] := ?q };
+        };
+        switch (data.ratings) {
+          case (null) {};
+          case (?r) { ratingsStore[sign] := ?r };
+        };
+      };
     };
-    zodiacSigns.add(zodiacSign, updatedEntry);
+    zodiacSigns := Map.empty();
   };
 
-  public query func getQuotation(zodiacSign : ZodiacSign) : async ?Text {
-    if (zodiacSign > 11) { Runtime.trap("Invalid zodiac sign index") };
-    switch (zodiacSigns.get(zodiacSign)) {
-      case (null) { null };
-      case (?data) { data.quotation };
-    };
+  public func setQuotation(zodiacSign : Nat, quotation : Text) : async () {
+    assert zodiacSign < 12;
+    quotations[zodiacSign] := ?quotation;
+  };
+
+  public query func getQuotation(zodiacSign : Nat) : async ?Text {
+    assert zodiacSign < 12;
+    quotations[zodiacSign];
   };
 
   public func setRatings(
-    zodiacSign : ZodiacSign,
+    zodiacSign : Nat,
     luck : Nat,
     happiness : Nat,
     love : Nat,
     good : Nat,
     overall : Nat,
   ) : async () {
-    if (zodiacSign > 11) { Runtime.trap("Invalid zodiac sign index") };
-    if (
-      luck < 1 or luck > 5 or happiness < 1 or happiness > 5 or love < 1 or love > 5 or good < 1 or good > 5 or overall < 1 or overall > 5
-    ) {
-      Runtime.trap("Ratings values should be between 1 and 5");
-    };
-    let newRatings = {
-      luck;
-      happiness;
-      love;
-      good;
-      overall;
-    };
-    let existingEntry = zodiacSigns.get(zodiacSign);
-    let updatedEntry = {
-      quotation = switch (existingEntry) { case (null) { null }; case (?data) { data.quotation } };
-      ratings = ?newRatings;
-    };
-    zodiacSigns.add(zodiacSign, updatedEntry);
+    assert zodiacSign < 12;
+    assert luck >= 1 and luck <= 5;
+    assert happiness >= 1 and happiness <= 5;
+    assert love >= 1 and love <= 5;
+    assert good >= 1 and good <= 5;
+    assert overall >= 1 and overall <= 5;
+    ratingsStore[zodiacSign] := ?{ luck; happiness; love; good; overall };
   };
 
-  public query func getRatings(zodiacSign : ZodiacSign) : async ?Ratings {
-    if (zodiacSign > 11) { Runtime.trap("Invalid zodiac sign index") };
-    switch (zodiacSigns.get(zodiacSign)) {
-      case (null) { null };
-      case (?data) { data.ratings };
-    };
+  public query func getRatings(zodiacSign : Nat) : async ?Ratings {
+    assert zodiacSign < 12;
+    ratingsStore[zodiacSign];
   };
 
-  public query func getAllQuotations() : async [(ZodiacSign, ?Text)] {
-    zodiacSigns.entries().toArray().map(
-      func((sign, data)) { (sign, data.quotation) }
-    );
+  public query func getAllQuotations() : async [(Nat, ?Text)] {
+    Array.tabulate<(Nat, ?Text)>(12, func(i) { (i, quotations[i]) });
   };
 
-  public query func getAllRatings() : async [(ZodiacSign, ?Ratings)] {
-    zodiacSigns.entries().toArray().map(
-      func((sign, data)) { (sign, data.ratings) }
-    );
+  public query func getAllRatings() : async [(Nat, ?Ratings)] {
+    Array.tabulate<(Nat, ?Ratings)>(12, func(i) { (i, ratingsStore[i]) });
   };
 };
